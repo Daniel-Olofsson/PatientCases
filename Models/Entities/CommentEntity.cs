@@ -1,6 +1,6 @@
 ﻿namespace PatientCases.Models.Entities;
 
-internal class CommentEntity
+public class CommentEntity
 {
     public CommentEntity() 
     {

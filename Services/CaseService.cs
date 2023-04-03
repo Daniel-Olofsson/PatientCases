@@ -28,8 +28,8 @@ namespace PatientCases.Services
             var newCase = new CaseEntity
             {
                 Title = caseTitle,
-                PatientId = patient.PatientId,
-                DoctorId =  doctor.DoctorId,
+                PatientId = patient.Id,
+                DoctorId =  doctor.Id,
                 Comments = new List <CommentEntity> { comment},
                 StatusId = status.Id,
                 DateCreated = DateTime.Now,
@@ -59,7 +59,7 @@ namespace PatientCases.Services
 
         public async Task<PatientEntity> GetOrCreatePatientAsync(int patientId)
         {
-            var existingPatient = await _context.Patients.FirstOrDefaultAsync(p => p.PatientId == patientId);
+            var existingPatient = await _context.Patients.FirstOrDefaultAsync(p => p.Id == patientId);
 
             if (existingPatient != null)
             {
@@ -86,7 +86,7 @@ namespace PatientCases.Services
 
         public async Task<DoctorEntity> GetOrCreateDoctorAsync(int doctorId)
         {
-            var existingDoctor = await _context.Doctors.FirstOrDefaultAsync(d => d.DoctorId == doctorId);
+            var existingDoctor = await _context.Doctors.FirstOrDefaultAsync(d => d.Id == doctorId);
 
             if (existingDoctor != null)
             {
@@ -102,7 +102,7 @@ namespace PatientCases.Services
                 .Include(c => c.Patient)
                 .Include(c => c.Status)
                 .Include(c => c.Doctor)
-                .Include(c => c.Comment)
+                .Include(c => c.Comments)
                 .FirstOrDefaultAsync(predicate);
         }
     }

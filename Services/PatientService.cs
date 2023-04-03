@@ -33,7 +33,25 @@ namespace PatientCases.Services
                     .ThenInclude(c => c.Status)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
+        public async Task<PatientEntity> GetOrCreateAsync(int patientId)
+        {
+            var existingPatient = await _context.Patients.FindAsync(patientId);
 
+            if (existingPatient != null)
+            {
+                return existingPatient;
+            }
+
+            var newPatient = new PatientEntity
+            {
+                PatientId = patientId
+            };
+
+            await _context.Patients.AddAsync(newPatient);
+            await _context.SaveChangesAsync();
+
+            return newPatient;
+        }
         public async Task<IEnumerable<PatientEntity>> FindAsync(Expression<Func<PatientEntity, bool>> predicate)
         {
             return await _context.Patients.Where(predicate).ToListAsync();

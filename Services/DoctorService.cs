@@ -43,6 +43,39 @@ namespace PatientCases.Services
         {
             return await _context.Doctors.Where(d => d.Specialization == specialization).ToListAsync();
         }
+        public async Task<DoctorEntity> GetOrCreateAsync(int doctorId)
+        {
+            var existingDoctor = await _context.Doctors.FindAsync(doctorId);
+
+            if (existingDoctor != null)
+            {
+                return existingDoctor;
+            }
+
+            throw new ArgumentException($"Doctor with id {doctorId} does not exist");
+        }
+
+        public async Task<DoctorEntity> GetOrCreateAsync(string firstName, string lastName)
+        {
+            var existingDoctor = await _context.Doctors.FirstOrDefaultAsync(d => d.FName == firstName && d.LName == lastName);
+
+            if (existingDoctor != null)
+            {
+                return existingDoctor;
+            }
+
+            var newDoctor = new DoctorEntity
+            {
+                FName = firstName,
+                LName = lastName
+            };
+
+            await _context.Doctors.AddAsync(newDoctor);
+            await _context.SaveChangesAsync();
+
+            return newDoctor;
+        }
+
 
         public async Task UpdateAsync(DoctorEntity doctor)
         {
