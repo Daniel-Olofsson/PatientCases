@@ -1,12 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PatientCases.Models.Entities;
+﻿namespace PatientCases.Models.Entities;
 
 internal class CommentEntity
 {
@@ -15,6 +7,7 @@ internal class CommentEntity
         Comment = null!;
         Created = DateTime.Now;
         Case = null!;
+        CaseId = Guid.NewGuid(); // initiera CaseId med ett GUID
     }
     public int Id { get; set; }
     public string Comment { get; set; } 
