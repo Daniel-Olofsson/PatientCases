@@ -23,8 +23,8 @@ var comment = new CommentEntity() {  };
 var _doctorModel = new DoctorModels() { FName = "Leon", LName = "Lagergren", Specialization = "Nothing" };
 var _patientModel = new PatientModels() { PatientName = "Hans", Email = "hans@hospital.se" };
 
-await doctorService.GetOrCreateAsync(_doctorModel);
-await patientService.GetOrCreateAsync(_patientModel);
+await doctorService.GetOrCreateAsync(_doctorModel, 1);
+await patientService.GetOrCreateAsync(_patientModel, 1);
 
 
 
