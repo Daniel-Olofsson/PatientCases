@@ -1,88 +1,109 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using PatientCases.Context;
 using PatientCases.Models.Entities;
-using System.Linq.Expressions;
 
-namespace PatientCases.Services;
-
-internal class CaseService
+namespace PatientCases.Services
 {
-    private readonly DataContext _context= new DataContext();
-    public async Task CreateAsync(CaseEntity caseEntity)
+    internal class CaseService
     {
-        await _context.AddAsync(caseEntity);
-        await _context.SaveChangesAsync();
-    }
-    public async Task<IEnumerable<CaseEntity>> GetAllActiveAsync()
-    {
-        return await _context.Cases
-            .Include(x=> x.Comments)
-            .Include(x=> x.Patient)
-            .Include(x=> x.Doctor)
-            .Include(x=> x.Status)
-            .Where(x=> x.StatusId!= 3)
-            .OrderByDescending(x=>x.DateCreated)
-            .ToListAsync();
-    }
-    public async Task<IEnumerable<CaseEntity>> GetAllAsync()
-    {
-        return await _context.Cases
-            .Include(x => x.Comments)
-            .Include(x => x.Patient)
-            .Include(x => x.Doctor)
-            .Include(x => x.Status)
-            .OrderByDescending(x => x.DateCreated)
-            .ToListAsync();
-    }
-    public async Task<CaseEntity> GetAsync(Expression<Func<CaseEntity, bool>> predicate)
-    {
-        var _entity = await _context.Cases
-            .Include(x => x.Comments)
-            .Include(x => x.Patient)
-            .Include(x => x.Doctor)
-            .Include(x => x.Status)
-            .FirstOrDefaultAsync(predicate);
-        return _entity!;
-    }
-    public async Task UpdateCaseDoctorAsync(int caseId, DoctorEntity doctorEntity)
-    {
-        var _entity = await _context.Cases.FindAsync(caseId);
-        if (_entity != null)
+        private readonly DataContext _context;
+        private readonly PatientService _patientService;
+        private readonly DoctorService _doctorService;
+
+        public CaseService(DataContext context, PatientService patientService, DoctorService doctorService)
         {
-            _entity.DateModified = DateTime.Now;
-            _entity.Doctor = doctorEntity;
-            _context.Update(_entity);
-            await _context.SaveChangesAsync();
+            _context = context;
+            _patientService = patientService;
+            _doctorService = doctorService;
         }
-    }
-    public async Task<CaseEntity> UpdateCaseStatusAsync(Expression<Func<CaseEntity, bool>> predicate)
-    {
-        var _caseEntity = await _context.Cases.FirstOrDefaultAsync(predicate);
-        if (_caseEntity != null)
+
+        public async Task<CaseEntity> CreateCaseAsync(string caseTitle, int patientId, int doctorId, CommentEntity comment, StatusEntity status)
         {
-            switch (_caseEntity.StatusId)
+            var patient = await _patientService.GetOrCreateAsync(patientId);
+            var doctor = await _doctorService.GetOrCreateAsync(doctorId);
+
+            var newCase = new CaseEntity
             {
-                case 1:
-                    _caseEntity.StatusId = 2;
-                    _caseEntity.DateModified = DateTime.Now;
-                    break;
+                Title = caseTitle,
+                PatientId = patient.PatientId,
+                DoctorId =  doctor.DoctorId,
+                Comments = new List <CommentEntity> { comment},
+                StatusId = status.Id,
+                DateCreated = DateTime.Now,
+                DateModified = DateTime.Now
+            };
 
-                case 2:
-                    _caseEntity.StatusId = 3;
-                    _caseEntity.DateModified = DateTime.Now;
-                    break;
+            await _context.Cases.AddAsync(newCase);
+            await _context.SaveChangesAsync();
 
-                case 3:
-                    _caseEntity.StatusId = 2;
-                    _caseEntity.DateModified = DateTime.Now;
-                    break;
+            return newCase;
+        }
+
+        public async Task<PatientEntity> GetOrCreatePatientAsync(PatientEntity patient)
+        {
+            var existingPatient = await _context.Patients.FirstOrDefaultAsync(p => p.Email == patient.Email);
+
+            if (existingPatient != null)
+            {
+                return existingPatient;
             }
 
-            _context.Update(_caseEntity);
+            await _context.Patients.AddAsync(patient);
             await _context.SaveChangesAsync();
+
+            return patient;
         }
 
-        return _caseEntity!;
-    }
+        public async Task<PatientEntity> GetOrCreatePatientAsync(int patientId)
+        {
+            var existingPatient = await _context.Patients.FirstOrDefaultAsync(p => p.PatientId == patientId);
 
+            if (existingPatient != null)
+            {
+                return existingPatient;
+            }
+
+            throw new ArgumentException($"Patient with id {patientId} does not exist");
+        }
+
+        public async Task<DoctorEntity> GetOrCreateDoctorAsync(DoctorEntity doctor)
+        {
+            var existingDoctor = await _context.Doctors.FirstOrDefaultAsync(d => d.FName == doctor.FName && d.LName == doctor.LName);
+
+            if (existingDoctor != null)
+            {
+                return existingDoctor;
+            }
+
+            await _context.Doctors.AddAsync(doctor);
+            await _context.SaveChangesAsync();
+
+            return doctor;
+        }
+
+        public async Task<DoctorEntity> GetOrCreateDoctorAsync(int doctorId)
+        {
+            var existingDoctor = await _context.Doctors.FirstOrDefaultAsync(d => d.DoctorId == doctorId);
+
+            if (existingDoctor != null)
+            {
+                return existingDoctor;
+            }
+
+            throw new ArgumentException($"Doctor with id {doctorId} does not exist");
+        }
+
+        public async Task<CaseEntity> GetAsync(Expression<Func<CaseEntity, bool>> predicate)
+        {
+            return await _context.Cases
+                .Include(c => c.Patient)
+                .Include(c => c.Status)
+                .Include(c => c.Doctor)
+                .Include(c => c.Comment)
+                .FirstOrDefaultAsync(predicate);
+        }
+    }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PatientCases.Models.Entities;
 
-internal class PatientEntity
+public class PatientEntity
 {
     public PatientEntity() 
     {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PatientCases.Models.Entities;
 
-internal class DoctorEntity
+public class DoctorEntity
 {
     public DoctorEntity() 
     {

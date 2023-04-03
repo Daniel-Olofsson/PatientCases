@@ -9,7 +9,7 @@ internal class CommentEntity
         Case = null!;
         CaseId = Guid.NewGuid(); // initiera CaseId med ett GUID
     }
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public string Comment { get; set; } 
     public DateTime Created { get; set; }
 

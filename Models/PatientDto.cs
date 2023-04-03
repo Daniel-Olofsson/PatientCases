@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PatientCases.Models;
 
-internal class PatientViewModel
+internal class PatientDto
 {
     public int Id { get; set; }
     public string PatientName { get; set; }

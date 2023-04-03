@@ -1,65 +1,19 @@
-﻿
+﻿// Initialize services
 using PatientCases.Models;
-using PatientCases.Models.Entities;
 using PatientCases.Services;
 
 var statusService = new StatusService();
 var commentService = new CommentService();
 var caseService = new CaseService();
 var patientService = new PatientService();
-
 var doctorService = new DoctorService();
 
-// Initialize
 await statusService.InitializeAsync();
 
-//Comment = null!;
-//Created = DateTime.Now;
-//Case = null!;
-//CaseId = Guid.NewGuid(); // initiera CaseId med ett GUID
+// Create a new case
+var patient = await patientService.GetOrCreateAsync(new PatientModels() { PatientName = "John", Email = "john@example.com" }, 1);
+var doctor = await doctorService.GetOrCreateAsync(new DoctorModels() { FName = "Jack", LName = "Smith", Specialization = "Cardiology" }, 1);
+var status = await statusService.GetAsync(s => s.StatusName == "Stable");
 
-var comment = new CommentEntity() {  };
-
-var _doctorModel = new DoctorModels() { FName = "Leon", LName = "Lagergren", Specialization = "Nothing" };
-var _patientModel = new PatientModels() { PatientName = "Hans", Email = "hans@hospital.se" };
-
-await doctorService.GetOrCreateAsync(_doctorModel, 1);
-await patientService.GetOrCreateAsync(_patientModel, 1);
-
-
-
-//await commentService.InitializeCommentAsync(); // kör initiera comment-data
-var doctorResult = await doctorService.GetAllAsync();
-var statusResult = await statusService.GetAllAsync();
-var patientResult = await patientService.GetAllAsync();
-
-foreach (var patient in patientResult)
-{
-    Console.WriteLine($"{patient.PatientName}");
-
-}
-Console.WriteLine("----------------------------------------------------------");
-
-foreach (var status in statusResult)
-{
-    Console.WriteLine($"{status.StatusName}");
-}
-
-Console.WriteLine("----------------------------------------------------------");
-
-
-foreach (var doctor in doctorResult)
-{
-    Console.WriteLine($"{doctor.FName}");
-}
-
-
-Console.WriteLine("----------------------------------------------------------");
-
-//var commentResult = await commentService.GetAllAsync();
-//foreach (var comment in commentResult)
-//{
-//    Console.WriteLine($"{comment.Comment}");
-//}
-
-Console.ReadKey();
+var newCase = await caseService.CreateCaseAsync("New case", patient.PatientId, doctor.DoctorId, status);
+Console.WriteLine($"Created new case with id {newCase.CaseId}");

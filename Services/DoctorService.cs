@@ -1,39 +1,66 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PatientCases.Context;
-using PatientCases.Models;
 using PatientCases.Models.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
 
-namespace PatientCases.Services;
-
-internal class DoctorService
+namespace PatientCases.Services
 {
-    private readonly DataContext _context = new DataContext();
+    internal class DoctorService
+    {
+        private readonly DataContext _context;
 
-        public async Task<DoctorEntity> GetOrCreateAsync(DoctorModels model, int id)
+        public DoctorService(DataContext context)
         {
-        
-        var _doctorEntity = await _context.Doctors.FirstOrDefaultAsync(x => x.LName == model.LName);
-            if (_doctorEntity == null)
-            {
-            var _patientEntity = await _context.Patients.FirstOrDefaultAsync(x => x.Id == id);
-            _doctorEntity = new DoctorEntity
-            {
-                    FName = model.FName,
-                    LName = model.LName,
-                    Specialization= model.Specialization,
-                    Patients = new List<PatientEntity> { _patientEntity }
-                };
+            _context = context;
+        }
 
-                await _context.AddAsync(_doctorEntity);
-                await _context.SaveChangesAsync();
-            }
+        public async Task<DoctorEntity> CreateAsync(DoctorEntity doctor)
+        {
+            if (doctor == null)
+                throw new ArgumentNullException(nameof(doctor));
 
-            return _doctorEntity;
+            await _context.Doctors.AddAsync(doctor);
+            await _context.SaveChangesAsync();
+
+            return doctor;
+        }
+
+        public async Task<DoctorEntity> GetByIdAsync(int id)
+        {
+            return await _context.Doctors.FirstOrDefaultAsync(d => d.Id == id);
         }
 
         public async Task<IEnumerable<DoctorEntity>> GetAllAsync()
         {
-            return await _context.Doctors.Include(d => d.Patients).ToListAsync();
+            return await _context.Doctors.ToListAsync();
         }
 
+        public async Task<IEnumerable<DoctorEntity>> GetBySpecializationAsync(string specialization)
+        {
+            return await _context.Doctors.Where(d => d.Specialization == specialization).ToListAsync();
+        }
+
+        public async Task UpdateAsync(DoctorEntity doctor)
+        {
+            if (doctor == null)
+                throw new ArgumentNullException(nameof(doctor));
+
+            _context.Entry(doctor).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.Id == id);
+            if (doctor == null)
+                throw new InvalidOperationException($"Doctor with Id {id} not found.");
+
+            _context.Doctors.Remove(doctor);
+            await _context.SaveChangesAsync();
+        }
+    }
 }

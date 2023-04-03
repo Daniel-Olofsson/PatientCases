@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PatientCases.Models.Entities;
 
-internal class StatusEntity
+public class StatusEntity
 {
     public int Id { get; set; }
     public string StatusName { get; set; } = null!;

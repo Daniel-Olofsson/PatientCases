@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PatientCases.Context;
 
-internal class DataContext : DbContext
+public class DataContext : DbContext
 {
     public DataContext()
     {
