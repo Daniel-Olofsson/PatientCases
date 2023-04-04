@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace PatientCases.Services;
 
-internal class CommentService
+public class CommentService
 {
     private readonly DataContext _context;
 
@@ -18,74 +18,56 @@ internal class CommentService
         _context = context;
     }
 
-    public async Task<CommentEntity> CreateAsync(CommentEntity comment)
+    public void AddComment(string comment, Guid caseId)
     {
-        // add the new comment to the context and save changes
-        _context.Comments.Add(comment);
-        await _context.SaveChangesAsync();
+        var caseEntity = _context.Cases.FirstOrDefault(c => c.Id == caseId);
 
-        return comment;
-    }
-
-    public async Task<CommentEntity> GetAsync(Guid id)
-    {
-        // find the comment with the given id
-        var comment = await _context.Comments.FindAsync(id);
-
-        // return null if not found
-        return comment;
-    }
-
-    public async Task<IEnumerable<CommentEntity>> GetAllAsync()
-    {
-        // get all comments from the context
-        var comments = await _context.Comments.ToListAsync();
-
-        return comments;
-    }
-
-    public async Task<IEnumerable<CommentEntity>> GetAllByCaseIdAsync(Guid caseId)
-    {
-        // get all comments for the given case id
-        var comments = await _context.Comments
-            .Where(c => c.CaseId == caseId)
-            .ToListAsync();
-
-        return comments;
-    }
-
-    public async Task<bool> UpdateAsync(CommentEntity comment)
-    {
-        // check if the comment exists in the context
-        var existingComment = await _context.Comments.FindAsync(comment.Id);
-        if (existingComment == null)
+        if (caseEntity == null)
         {
-            return false;
+            throw new ArgumentException($"No case found with ID {caseId}");
         }
 
-        // update the existing comment properties
-        existingComment.Comment = comment.Comment;
-        existingComment.Created = comment.Created;
+        var commentEntity = new CommentEntity
+        {
+            Comment = comment,
+            CaseId = caseId
+        };
 
-        // save changes to the context
-        await _context.SaveChangesAsync();
-
-        return true;
+        _context.Comments.Add(commentEntity);
+        _context.SaveChanges();
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public void ViewComments(Guid caseId, int statusId)
     {
-        // find the comment with the given id
-        var comment = await _context.Comments.FindAsync(id);
-        if (comment == null)
+        var caseEntity = _context.Cases.FirstOrDefault(c => c.Id == caseId);
+
+        if (caseEntity == null)
         {
-            return false;
+            throw new ArgumentException($"No case found with ID {caseId}");
         }
 
-        // remove the comment from the context
-        _context.Comments.Remove(comment);
-        await _context.SaveChangesAsync();
+        Console.WriteLine($"Comments for case {caseEntity.Id} with status {statusId}:");
+        Console.WriteLine();
 
-        return true;
+        var comments = _context.Comments
+            .Join(_context.Cases,
+                  comment => comment.CaseId,
+                  caseEntity => caseEntity.Id,
+                  (comment, caseEntity) => new { Comment = comment, Case = caseEntity })
+            .Where(c => c.Case.StatusId == statusId && c.Comment.CaseId == caseId)
+            .OrderByDescending(c => c.Comment.Created)
+            .ToList();
+
+        if (comments.Any())
+        {
+            foreach (var comment in comments)
+            {
+                Console.WriteLine($"[{comment.Comment.Created}] {comment.Comment.Comment}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("No comments found.");
+        }
     }
 }

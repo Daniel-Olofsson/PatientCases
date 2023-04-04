@@ -12,8 +12,8 @@ using PatientCases.Context;
 namespace PatientCases.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230331140619_Patients")]
-    partial class Patients
+    [Migration("20230404094343_Patient")]
+    partial class Patient
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -63,11 +63,9 @@ namespace PatientCases.Migrations
 
             modelBuilder.Entity("PatientCases.Models.Entities.CommentEntity", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("CaseId")
                         .HasColumnType("uniqueidentifier");

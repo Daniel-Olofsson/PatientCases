@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace PatientCases.Services;
 
-internal class StatusService
+public class StatusService
 {
     private readonly DataContext _context = new();
     public async Task InitializeAsync()

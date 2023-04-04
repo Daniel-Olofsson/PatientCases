@@ -1,15 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PatientCases.Context;
+﻿using PatientCases.Context;
 using PatientCases.Models.Entities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
+using System.Numerics;
 
-namespace PatientCases.Services
+namespace YourProjectName.Services
 {
-    internal class DoctorService
+    public class DoctorService
     {
         private readonly DataContext _context;
 
@@ -18,82 +15,32 @@ namespace PatientCases.Services
             _context = context;
         }
 
-        public async Task<DoctorEntity> CreateAsync(DoctorEntity doctor)
+        public void AddDoctor(string fname,string lname, string specialization)
         {
-            if (doctor == null)
-                throw new ArgumentNullException(nameof(doctor));
-
-            await _context.Doctors.AddAsync(doctor);
-            await _context.SaveChangesAsync();
-
-            return doctor;
-        }
-
-        public async Task<DoctorEntity> GetByIdAsync(int id)
-        {
-            return await _context.Doctors.FirstOrDefaultAsync(d => d.Id == id);
-        }
-
-        public async Task<IEnumerable<DoctorEntity>> GetAllAsync()
-        {
-            return await _context.Doctors.ToListAsync();
-        }
-
-        public async Task<IEnumerable<DoctorEntity>> GetBySpecializationAsync(string specialization)
-        {
-            return await _context.Doctors.Where(d => d.Specialization == specialization).ToListAsync();
-        }
-        public async Task<DoctorEntity> GetOrCreateAsync(int doctorId)
-        {
-            var existingDoctor = await _context.Doctors.FindAsync(doctorId);
-
-            if (existingDoctor != null)
-            {
-                return existingDoctor;
-            }
-
-            throw new ArgumentException($"Doctor with id {doctorId} does not exist");
-        }
-
-        public async Task<DoctorEntity> GetOrCreateAsync(string firstName, string lastName)
-        {
-            var existingDoctor = await _context.Doctors.FirstOrDefaultAsync(d => d.FName == firstName && d.LName == lastName);
-
-            if (existingDoctor != null)
-            {
-                return existingDoctor;
-            }
-
             var newDoctor = new DoctorEntity
             {
-                FName = firstName,
-                LName = lastName
+                FName = fname,
+                LName = lname,
+                Specialization = specialization
             };
 
-            await _context.Doctors.AddAsync(newDoctor);
-            await _context.SaveChangesAsync();
-
-            return newDoctor;
+            _context.Doctors.Add(newDoctor);
+            _context.SaveChanges();
         }
 
-
-        public async Task UpdateAsync(DoctorEntity doctor)
+        public void ViewDoctors()
         {
-            if (doctor == null)
-                throw new ArgumentNullException(nameof(doctor));
+            var doctors = _context.Doctors.ToList();
 
-            _context.Entry(doctor).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(int id)
-        {
-            var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.Id == id);
-            if (doctor == null)
-                throw new InvalidOperationException($"Doctor with Id {id} not found.");
-
-            _context.Doctors.Remove(doctor);
-            await _context.SaveChangesAsync();
+            foreach (var doctor in doctors)
+            {
+                Console.WriteLine($"Doctor ID: {doctor.Id}");
+                Console.WriteLine($"Name: {doctor.FName}");
+                Console.WriteLine($"Name: {doctor.LName}");
+                Console.WriteLine($"Specialty: {doctor.Specialization}");
+                
+                Console.WriteLine();
+            }
         }
     }
 }

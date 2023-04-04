@@ -1,109 +1,52 @@
-﻿using System;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using PatientCases.Context;
+﻿using PatientCases.Context;
 using PatientCases.Models.Entities;
+using PatientCases.Services;
+using System;
+using System.Linq;
 
-namespace PatientCases.Services
+namespace YourProjectName.Services
 {
-    internal class CaseService
+    public class CaseService
     {
         private readonly DataContext _context;
-        private readonly PatientService _patientService;
-        private readonly DoctorService _doctorService;
-
-        public CaseService(DataContext context, PatientService patientService, DoctorService doctorService)
+        private readonly StatusService _statusService;
+        public CaseService(DataContext context, StatusService statusService)
         {
             _context = context;
-            _patientService = patientService;
-            _doctorService = doctorService;
+            _statusService = statusService;
         }
 
-        public async Task<CaseEntity> CreateCaseAsync(string caseTitle, int patientId, int doctorId, CommentEntity comment, StatusEntity status)
+        public async void AddCase(CommentEntity comment,string title, int doctorId, int patientId, int statusid)
         {
-            var patient = await _patientService.GetOrCreateAsync(patientId);
-            var doctor = await _doctorService.GetOrCreateAsync(doctorId);
-
+            var _status = await _statusService.GetAsync(x=>x.Id == statusid);
             var newCase = new CaseEntity
             {
-                Title = caseTitle,
-                PatientId = patient.Id,
-                DoctorId =  doctor.Id,
-                Comments = new List <CommentEntity> { comment},
-                StatusId = status.Id,
-                DateCreated = DateTime.Now,
-                DateModified = DateTime.Now
+                Comments = new List<CommentEntity> { comment },
+                Title = title,
+                DoctorId = doctorId,
+                PatientId = patientId,
+                Status = _status,
+               
+                
             };
 
-            await _context.Cases.AddAsync(newCase);
-            await _context.SaveChangesAsync();
-
-            return newCase;
+            _context.Cases.Add(newCase);
+            _context.SaveChanges();
         }
 
-        public async Task<PatientEntity> GetOrCreatePatientAsync(PatientEntity patient)
+        public void ViewCases()
         {
-            var existingPatient = await _context.Patients.FirstOrDefaultAsync(p => p.Email == patient.Email);
+            var cases = _context.Cases.ToList();
 
-            if (existingPatient != null)
+            foreach (var caseItem in cases)
             {
-                return existingPatient;
+                Console.WriteLine($"Case ID: {caseItem.Id}");
+                Console.WriteLine($"Comment: {caseItem.Comments}");
+                Console.WriteLine($"Doctor Name: {caseItem.Doctor.FName}");
+                Console.WriteLine($"Patient Name: {caseItem.Patient.PatientName}");
+                Console.WriteLine($"Status: {caseItem.Status}");
+                Console.WriteLine();
             }
-
-            await _context.Patients.AddAsync(patient);
-            await _context.SaveChangesAsync();
-
-            return patient;
-        }
-
-        public async Task<PatientEntity> GetOrCreatePatientAsync(int patientId)
-        {
-            var existingPatient = await _context.Patients.FirstOrDefaultAsync(p => p.Id == patientId);
-
-            if (existingPatient != null)
-            {
-                return existingPatient;
-            }
-
-            throw new ArgumentException($"Patient with id {patientId} does not exist");
-        }
-
-        public async Task<DoctorEntity> GetOrCreateDoctorAsync(DoctorEntity doctor)
-        {
-            var existingDoctor = await _context.Doctors.FirstOrDefaultAsync(d => d.FName == doctor.FName && d.LName == doctor.LName);
-
-            if (existingDoctor != null)
-            {
-                return existingDoctor;
-            }
-
-            await _context.Doctors.AddAsync(doctor);
-            await _context.SaveChangesAsync();
-
-            return doctor;
-        }
-
-        public async Task<DoctorEntity> GetOrCreateDoctorAsync(int doctorId)
-        {
-            var existingDoctor = await _context.Doctors.FirstOrDefaultAsync(d => d.Id == doctorId);
-
-            if (existingDoctor != null)
-            {
-                return existingDoctor;
-            }
-
-            throw new ArgumentException($"Doctor with id {doctorId} does not exist");
-        }
-
-        public async Task<CaseEntity> GetAsync(Expression<Func<CaseEntity, bool>> predicate)
-        {
-            return await _context.Cases
-                .Include(c => c.Patient)
-                .Include(c => c.Status)
-                .Include(c => c.Doctor)
-                .Include(c => c.Comments)
-                .FirstOrDefaultAsync(predicate);
         }
     }
 }
