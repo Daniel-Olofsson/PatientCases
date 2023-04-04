@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -12,10 +13,19 @@ public class StatusEntity
 {
 
 
-    [Key]
-    [Range(1,3)]
+    
     public int Id { get; set; }
     public string StatusName { get; set; } = null!;
 
     public ICollection<CaseEntity> Cases { get; set; } = new HashSet<CaseEntity>();
+    public static void Configure(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<StatusEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            entity.Property(e => e.StatusName).IsRequired().HasMaxLength(50);
+            
+        });
+    }
 }

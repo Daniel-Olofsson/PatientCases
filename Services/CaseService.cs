@@ -25,7 +25,8 @@ namespace YourProjectName.Services
                 Title = title,
                 DoctorId = doctorId,
                 PatientId = patientId,
-                Status = _status,
+                StatusId = _status.Id,
+                //Status = new StatusEntity { Id = _status.Id, StatusName=_status.StatusName }
                
                 
             };
@@ -41,10 +42,30 @@ namespace YourProjectName.Services
             foreach (var caseItem in cases)
             {
                 Console.WriteLine($"Case ID: {caseItem.Id}");
+
+                if (caseItem.Comments != null)
+                {
+                    Console.WriteLine($"Comment(s):");
+                    foreach (var comment in caseItem.Comments)
+                    {
+                        Console.WriteLine($"- {comment.Comment}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("No comments.");
+                }
                 Console.WriteLine($"Comment: {caseItem.Comments}");
                 Console.WriteLine($"Doctor Name: {caseItem.Doctor.FName}");
                 Console.WriteLine($"Patient Name: {caseItem.Patient.PatientName}");
-                Console.WriteLine($"Status: {caseItem.Status}");
+                if (caseItem.Status != null)
+                {
+                    Console.WriteLine($"Status: {caseItem.Status.StatusName}");
+                }
+                else
+                {
+                    Console.WriteLine("No status assigned.");
+                }
                 Console.WriteLine();
             }
         }

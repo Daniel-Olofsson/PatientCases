@@ -33,9 +33,10 @@ public class CaseEntity
     public int PatientId { get; set; }
     public PatientEntity Patient { get; set; }
 
-    [ForeignKey(nameof(Status))]
-    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    
+    
     public int StatusId { get; set; } = 1;
+    [ForeignKey(nameof(StatusId))]
     public StatusEntity Status { get; set; }
     
     [ForeignKey("Doctor")]

@@ -8,15 +8,19 @@ namespace PatientCases.Services;
 public class StatusService
 {
     private readonly DataContext _context = new();
+    public StatusService()
+    {
+        
+    }
     public async Task InitializeAsync()
     {
         if (!await _context.Statuses.AnyAsync())
         {
             var list = new List<StatusEntity>()
             {
-                new StatusEntity() { StatusName = "Stable" },
-                new StatusEntity() { StatusName = "Critical" },
-                new StatusEntity() { StatusName = "Discharged" },
+                new StatusEntity() {  StatusName = "Stable" },
+                new StatusEntity() {  StatusName = "Critical" },
+                new StatusEntity() {  StatusName = "Discharged" },
             };
 
             _context.AddRange(list);

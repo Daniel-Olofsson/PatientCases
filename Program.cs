@@ -11,7 +11,7 @@ class Program
     static async Task Main(string[] args)
     {
         var _statusService = new StatusService();
-        await _statusService.InitializeAsync();
+        await _statusService.InitializeAsync().ConfigureAwait(false);
         using (var context = new DataContext())
         {
             var caseService = new CaseService(context, new StatusService());
@@ -120,7 +120,7 @@ class Program
                                 Console.WriteLine("Enter patient name:");
                                 var patientName = Console.ReadLine();
 
-                                Console.WriteLine("Enter patient date of birth (MM/DD/YYYY):");
+                                Console.WriteLine("Enter patient Email:");
                                 var email = (Console.ReadLine());
 
                                 Console.WriteLine("Enter doctor ID:");
