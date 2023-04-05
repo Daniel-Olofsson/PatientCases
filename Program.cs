@@ -18,20 +18,7 @@ class Program
             var doctorService = new DoctorService(context);
             var patientService = new PatientService(context);
 
-            //CaseEntity caseEntity = null;
 
-            //while (caseEntity == null)
-            //{
-            //    Console.WriteLine("Enter the title of the case you want to view:");
-            //    string input = Console.ReadLine();
-
-            //    caseEntity = await caseService.GetAsync(x => x.Title == input);
-
-            //    if (caseEntity == null)
-            //    {
-            //        Console.WriteLine($"Case with title '{input}' was not found. Please try again.");
-            //    }
-            //}
 
 
             int selectedIndex = 0;
@@ -50,7 +37,9 @@ class Program
                 PrintMenuOption("View doctors", selectedIndex == 3);
                 PrintMenuOption("Add patient", selectedIndex == 4);
                 PrintMenuOption("View patients", selectedIndex == 5);
-                PrintMenuOption("Exit", selectedIndex == 6);
+                PrintMenuOption("Change status", selectedIndex == 6);
+                PrintMenuOption("Search a case", selectedIndex == 7);
+                PrintMenuOption("Exit", selectedIndex == 8);
 
                 ConsoleKeyInfo keyInfo = Console.ReadKey(true);
                 switch (keyInfo.Key)
@@ -63,7 +52,7 @@ class Program
                         break;
 
                     case ConsoleKey.DownArrow:
-                        if (selectedIndex < 6)
+                        if (selectedIndex < 8)
                         {
                             selectedIndex++;
                         }
@@ -155,7 +144,68 @@ class Program
                                 Console.ReadKey();
                                 break;
 
-                            case 6: //change to 7
+                            case 6:
+                                Console.Clear();
+                                caseService.ViewTitles();
+                                Console.WriteLine("Write the title:");
+                                string searchTitle = Console.ReadLine();
+
+                                Console.WriteLine("Stabel, Critical or Discharged.");
+                                Console.WriteLine("Write a number (1-3):");
+                                
+                                
+                                int searchId = int.Parse(Console.ReadLine());
+
+                                _statusService.UpdateCaseStatusByTitle(searchTitle, searchId);
+
+                                if (searchId == 1)
+                                    Console.WriteLine("Patient is stabel");
+                                else if (searchId == 2)
+                                    Console.WriteLine("Patient is Critical");
+                                else if (searchId == 3)
+                                    Console.WriteLine("Patient is Discharged");
+
+                                Console.WriteLine("Press any key to continue.");
+                                Console.ReadKey();
+                                break;
+
+                            case 7:
+                                Console.Clear();
+                                CaseEntity caseEntity = null;
+
+                                while (caseEntity == null)
+                                {
+                                    caseService.ViewTitles();
+                                    Console.WriteLine("Enter the title of the case you want to view:");
+                                    string input = Console.ReadLine();
+
+                                    caseEntity = await caseService.SearchCasesAsync(x => x.Title == input);
+
+                                    if (caseEntity == null)
+                                    {
+                                        Console.WriteLine($"Case with title '{input}' was not found. Please try again.");
+                                    }
+                                    else
+                                    {
+                                        Console.Clear();
+                                        Console.WriteLine($"Titlename: {caseEntity.Title}");
+                                        Console.WriteLine($"Patientname: {caseEntity.Patient.PatientName}");
+                                        foreach (var listOfComment in caseEntity.Comments)
+                                        {
+                                            Console.WriteLine($"- {listOfComment.Comment}");
+                                        }
+                                        //Console.WriteLine($"Comment: {caseEntity.Comments.}");
+                                        Console.WriteLine($"Status: {caseEntity.Status.StatusName}");
+                                        Console.WriteLine($"Doctor: {caseEntity.Doctor.FName} {caseEntity.Doctor.LName}");
+                                        Console.WriteLine();
+                                    }
+                                }
+                                Console.WriteLine("Press any key to continue.");
+                                
+                                Console.ReadKey();
+                                break;
+
+                            case 8:
                                 exitRequested = true;
                                 break;
                         }

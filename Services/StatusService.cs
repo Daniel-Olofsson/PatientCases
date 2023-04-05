@@ -27,6 +27,22 @@ public class StatusService
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task UpdateCaseStatusByTitle(string title, int statusId)
+    {
+        var theCase = await _context.Cases.SingleOrDefaultAsync(c => c.Title == title);
+
+        if (theCase == null)
+        {
+            Console.WriteLine($"No case found with the title {title}");
+            return;
+        }
+
+        theCase.StatusId = statusId;
+        await _context.SaveChangesAsync();
+        Console.WriteLine($"Status of case with title '{title}' has been updated to '{statusId}'");
+    }
+
     public async Task<IEnumerable<StatusEntity>> GetAllAsync()
     {
         return await _context.Statuses.ToListAsync();

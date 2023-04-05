@@ -18,9 +18,9 @@ namespace YourProjectName.Services
             _statusService = statusService;
         }
 
-        public async void AddCase(CommentEntity comment,string title, int doctorId, int patientId, int statusid)
+        public async void AddCase(CommentEntity comment, string title, int doctorId, int patientId, int statusid)
         {
-            var _status = await _statusService.GetAsync(x=>x.Id == statusid);
+            var _status = await _statusService.GetAsync(x => x.Id == statusid);
             var newCase = new CaseEntity
             {
                 Comments = new List<CommentEntity> { comment },
@@ -29,23 +29,23 @@ namespace YourProjectName.Services
                 PatientId = patientId,
                 StatusId = _status.Id,
                 //Status = new StatusEntity { Id = _status.Id, StatusName=_status.StatusName }
-               
-                
+
+
             };
 
             _context.Cases.Add(newCase);
             _context.SaveChanges();
         }
-        public async Task<CaseEntity> GetAsync(Expression<Func<CaseEntity, bool>> predicate)
-        {
-            var _entity = await _context.Cases
-                .Include(x => x.Comments)
-                .Include(x => x.Patient)
-                .Include(x => x.Status)
-                .FirstOrDefaultAsync(predicate);
+        //public async Task<CaseEntity> GetAsync(Expression<Func<CaseEntity, bool>> predicate)
+        //{
+        //    var _entity = await _context.Cases
+        //        .Include(x => x.Comments)
+        //        .Include(x => x.Patient)
+        //        .Include(x => x.Status)
+        //        .FirstOrDefaultAsync(predicate);
 
-            return _entity!;
-        }
+        //    return _entity!;
+        //}
         public void ViewCases()
         {
             var cases = _context.Cases
@@ -93,6 +93,43 @@ namespace YourProjectName.Services
                 }
                 Console.WriteLine();
             }
+        }
+
+        public async Task<CaseEntity> SearchCasesAsync(Expression<Func<CaseEntity, bool>> predicate)
+        {
+            var _searchResult = await _context.Cases
+                .Include(x => x.Patient)
+                .Include(x => x.Comments)
+                .Include(x => x.Status)
+                .Include(x => x.Doctor)
+                .FirstOrDefaultAsync(predicate);
+
+            return _searchResult!;
+        }
+        public void ViewTitles()
+        {
+            var cases = _context.Cases
+            .Include(c => c.Patient)
+            .Include(c => c.Doctor)
+            .Include(c => c.Status)
+            .Select(c => new CaseEntity
+            {
+                Id = c.Id,
+                Patient = c.Patient,
+                Doctor = c.Doctor,
+                DateCreated = c.DateCreated,
+                Title = c.Title,
+                Comments = c.Comments,
+                Status = new StatusEntity { StatusName = c.Status.StatusName }
+            })
+            .ToList();
+            Console.WriteLine("Awailable titles:");
+
+            foreach (var caseItem in cases)
+            {
+                Console.WriteLine($"{caseItem.Title}");
+            }
+            Console.WriteLine();
         }
     }
 }

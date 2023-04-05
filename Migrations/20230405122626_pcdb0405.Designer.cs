@@ -12,8 +12,8 @@ using PatientCases.Context;
 namespace PatientCases.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230404125244_init")]
-    partial class init
+    [Migration("20230405122626_pcdb0405")]
+    partial class pcdb0405
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
