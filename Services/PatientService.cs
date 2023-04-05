@@ -1,4 +1,5 @@
-﻿using PatientCases.Context;
+﻿using Microsoft.EntityFrameworkCore;
+using PatientCases.Context;
 
 using PatientCases.Models.Entities;
 using System;
@@ -31,16 +32,37 @@ namespace YourProjectName.Services
 
         public void ViewPatients()
         {
-            var patients = _context.Patients.ToList();
+            var caseContext = _context.Cases
+                .Include(s => s.Status)
+                .ToList();
+            var patients = _context.Patients
+                .Include(p=>p.Cases)
+                .Include(p=>p.Doctor)
+                .ToList();
 
-            foreach (var patient in patients)
+            foreach (var item in patients)
             {
-                Console.WriteLine($"Patient ID: {patient.Id}");
-                Console.WriteLine($"Name: {patient.PatientName}");
+                Console.WriteLine($"Name: {item.PatientName}");
+                foreach (var _cases in item.Cases)
+                {
+                    Console.WriteLine($"Case:{_cases.Title}");
+
+                }
+                Console.Write("All current case statuses");
+                foreach (var cases in caseContext)
+                {
+                    
+                    Console.WriteLine($"{cases.Status.StatusName}");
+                }
+                //Console.WriteLine("------------------------");
+                Console.WriteLine($"Patient ID: {item.Id}");
                 
-                Console.WriteLine($"Doctor Name: {patient.Doctor.FName}");
+                Console.WriteLine($"Doctor Name: {item.Doctor.FName}");
                 Console.WriteLine();
+                
+
             }
+
         }
     }
 }

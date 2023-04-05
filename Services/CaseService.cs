@@ -1,4 +1,5 @@
-﻿using PatientCases.Context;
+﻿using Microsoft.EntityFrameworkCore;
+using PatientCases.Context;
 using PatientCases.Models.Entities;
 using PatientCases.Services;
 using System;
@@ -37,7 +38,21 @@ namespace YourProjectName.Services
 
         public void ViewCases()
         {
-            var cases = _context.Cases.ToList();
+            var cases = _context.Cases
+            .Include(c => c.Patient)
+            .Include(c => c.Doctor)
+            .Include(c => c.Status)
+            .Select(c => new CaseEntity
+            {
+                Id = c.Id,
+                Patient = c.Patient,
+                Doctor = c.Doctor,
+                DateCreated = c.DateCreated,
+                Title = c.Title,
+                Comments = c.Comments,
+                Status = new StatusEntity { StatusName = c.Status.StatusName }
+            })
+            .ToList();
 
             foreach (var caseItem in cases)
             {
