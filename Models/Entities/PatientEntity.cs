@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PatientCases.Models.Entities;
 
-internal class PatientEntity
+public class PatientEntity
 {
     public PatientEntity() 
     {
@@ -16,6 +17,7 @@ internal class PatientEntity
         Cases = new HashSet<CaseEntity>();
         Doctor = null!;
     }
+    [Key]
     public int Id { get; set; }
     public string PatientName { get; set; } 
     public string Email { get; set; }

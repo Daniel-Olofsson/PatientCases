@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PatientCases.Context;
 
-internal class DataContext : DbContext
+public class DataContext : DbContext
 {
     public DataContext()
     {
@@ -20,7 +20,7 @@ internal class DataContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlServer(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\Patient\patientdb.mdf;Integrated Security=True;Connect Timeout=30");
+        optionsBuilder.UseSqlServer(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\leon\source\repos\2023\Assigment\0331\PatientCases\Context\patientcasesdb0405_1.mdf;Integrated Security=True;Connect Timeout=30");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
