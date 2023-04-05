@@ -4,6 +4,7 @@ using PatientCases.Models.Entities;
 using PatientCases.Services;
 using System;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace YourProjectName.Services
 {
@@ -35,7 +36,16 @@ namespace YourProjectName.Services
             _context.Cases.Add(newCase);
             _context.SaveChanges();
         }
+        public async Task<CaseEntity> GetAsync(Expression<Func<CaseEntity, bool>> predicate)
+        {
+            var _entity = await _context.Cases
+                .Include(x => x.Comments)
+                .Include(x => x.Patient)
+                .Include(x => x.Status)
+                .FirstOrDefaultAsync(predicate);
 
+            return _entity!;
+        }
         public void ViewCases()
         {
             var cases = _context.Cases

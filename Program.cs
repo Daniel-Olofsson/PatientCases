@@ -18,6 +18,22 @@ class Program
             var doctorService = new DoctorService(context);
             var patientService = new PatientService(context);
 
+            //CaseEntity caseEntity = null;
+
+            //while (caseEntity == null)
+            //{
+            //    Console.WriteLine("Enter the title of the case you want to view:");
+            //    string input = Console.ReadLine();
+
+            //    caseEntity = await caseService.GetAsync(x => x.Title == input);
+
+            //    if (caseEntity == null)
+            //    {
+            //        Console.WriteLine($"Case with title '{input}' was not found. Please try again.");
+            //    }
+            //}
+
+
             int selectedIndex = 0;
             int previousSelectedIndex = -1;
             bool exitRequested = false;
@@ -139,7 +155,7 @@ class Program
                                 Console.ReadKey();
                                 break;
 
-                            case 6:
+                            case 6: //change to 7
                                 exitRequested = true;
                                 break;
                         }
